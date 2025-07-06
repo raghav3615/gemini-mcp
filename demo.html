@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini API Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        
+        .demo-section h2 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        input, textarea, select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #5a6fd8;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            background: white;
+            border: 1px solid #ddd;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .loading {
+            color: #667eea;
+            font-style: italic;
+        }
+        
+        .error {
+            color: #e74c3c;
+            background: #ffeaea;
+            border-color: #e74c3c;
+        }
+        
+        .success {
+            color: #27ae60;
+            background: #eafaf1;
+            border-color: #27ae60;
+        }
+        
+        .server-status {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .status-online {
+            background: #eafaf1;
+            color: #27ae60;
+            border: 1px solid #27ae60;
+        }
+        
+        .status-offline {
+            background: #ffeaea;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Gemini API Demo</h1>
+        
+        <div id="serverStatus" class="server-status">
+            Checking server status...
+        </div>
+        
+        <!-- Chat Demo -->
+        <div class="demo-section">
+            <h2>💬 Chat with Gemini</h2>
+            <div class="form-group">
+                <label for="chatMessage">Message:</label>
+                <textarea id="chatMessage" placeholder="Type your message here...">Hello! Tell me a fun fact about space.</textarea>
+            </div>
+            <div class="form-group">
+                <label for="chatModel">Model:</label>
+                <select id="chatModel">
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                    <option value="gemini-1.0-pro">Gemini 1.0 Pro</option>
+                </select>
+            </div>
+            <button onclick="testChat()">Send Message</button>
+            <div id="chatResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Vision Demo -->
+        <div class="demo-section">
+            <h2>👁️ Vision Analysis</h2>
+            <div class="form-group">
+                <label for="imageUrl">Image URL:</label>
+                <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" 
+                       value="https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Vd-Orig.svg/256px-Vd-Orig.svg.png">
+            </div>
+            <div class="form-group">
+                <label for="visionPrompt">Analysis Prompt:</label>
+                <textarea id="visionPrompt" placeholder="What do you see in this image?">Describe this image in detail and explain what it represents.</textarea>
+            </div>
+            <button onclick="testVision()">Analyze Image</button>
+            <div id="visionResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Code Execution Demo -->
+        <div class="demo-section">
+            <h2>💻 Code Execution</h2>
+            <div class="form-group">
+                <label for="pythonCode">Python Code:</label>
+                <textarea id="pythonCode" placeholder="Enter Python code...">import math
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create a simple plot
+x = np.linspace(0, 2*math.pi, 100)
+y = np.sin(x)
+
+plt.figure(figsize=(10, 6))
+plt.plot(x, y, 'b-', linewidth=2, label='sin(x)')
+plt.title('Sine Wave')
+plt.xlabel('x')
+plt.ylabel('sin(x)')
+plt.grid(True, alpha=0.3)
+plt.legend()
+plt.show()
+
+print("Plot created successfully!")</textarea>
+            </div>
+            <div class="form-group">
+                <label for="codeDescription">Description (optional):</label>
+                <input type="text" id="codeDescription" placeholder="What does this code do?" 
+                       value="Create a sine wave plot using matplotlib">
+            </div>
+            <button onclick="testCodeExecution()">Execute Code</button>
+            <div id="codeResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Function Calling Demo -->
+        <div class="demo-section">
+            <h2>🔧 Function Calling</h2>
+            <div class="form-group">
+                <label for="functionMessage">Message:</label>
+                <textarea id="functionMessage" placeholder="Your query...">What's the current weather in Paris and New York?</textarea>
+            </div>
+            <div class="form-group">
+                <label>Available Functions:</label>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                    This demo includes a mock weather function
+                </div>
+            </div>
+            <button onclick="testFunctionCalling()">Send with Functions</button>
+            <div id="functionResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000';
+        
+        // Check server status
+        async function checkServerStatus() {
+            const statusDiv = document.getElementById('serverStatus');
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                if (response.ok) {
+                    statusDiv.className = 'server-status status-online';
+                    statusDiv.textContent = '✅ API Server is online and ready';
+                } else {
+                    throw new Error('Server not responding');
+                }
+            } catch (error) {
+                statusDiv.className = 'server-status status-offline';
+                statusDiv.textContent = '❌ API Server is offline. Please start the server first.';
+            }
+        }
+        
+        // Generic API call function
+        async function callAPI(endpoint, data, resultElementId) {
+            const resultElement = document.getElementById(resultElementId);
+            resultElement.style.display = 'block';
+            resultElement.className = 'result loading';
+            resultElement.textContent = 'Processing your request...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    resultElement.className = 'result success';
+                    resultElement.textContent = result.data.response;
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+            } catch (error) {
+                resultElement.className = 'result error';
+                resultElement.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        // Test functions
+        async function testChat() {
+            const message = document.getElementById('chatMessage').value;
+            const model = document.getElementById('chatModel').value;
+            
+            if (!message.trim()) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            await callAPI('/chat', {
+                message: message,
+                model: model,
+                temperature: 0.7,
+                maxTokens: 1000
+            }, 'chatResult');
+        }
+        
+        async function testVision() {
+            const imageUrl = document.getElementById('imageUrl').value;
+            const prompt = document.getElementById('visionPrompt').value;
+            
+            if (!imageUrl.trim()) {
+                alert('Please enter an image URL');
+                return;
+            }
+            
+            await callAPI('/vision', {
+                imageUrl: imageUrl,
+                prompt: prompt || 'Describe this image in detail',
+                model: 'gemini-1.5-flash'
+            }, 'visionResult');
+        }
+        
+        async function testCodeExecution() {
+            const code = document.getElementById('pythonCode').value;
+            const description = document.getElementById('codeDescription').value;
+            
+            if (!code.trim()) {
+                alert('Please enter some Python code');
+                return;
+            }
+            
+            await callAPI('/code', {
+                code: code,
+                language: 'python',
+                description: description
+            }, 'codeResult');
+        }
+        
+        async function testFunctionCalling() {
+            const message = document.getElementById('functionMessage').value;
+            
+            if (!message.trim()) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            const functions = [
+                {
+                    name: 'get_weather',
+                    description: 'Get current weather information for a city',
+                    parameters: {
+                        type: 'object',
+                        properties: {
+                            city: {
+                                type: 'string',
+                                description: 'The city name'
+                            },
+                            units: {
+                                type: 'string',
+                                description: 'Temperature units (celsius or fahrenheit)',
+                                enum: ['celsius', 'fahrenheit']
+                            }
+                        },
+                        required: ['city']
+                    }
+                }
+            ];
+            
+            await callAPI('/functions', {
+                message: message,
+                functions: functions
+            }, 'functionResult');
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkServerStatus();
+            
+            // Auto-check server status every 30 seconds
+            setInterval(checkServerStatus, 30000);
+        });
+    </script>
+</body>
+</html>
