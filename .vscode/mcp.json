@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "automation-mcp-server": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["C:\\Users\\dadhi\\ml\\build\\index.js"]
+    }
+  }
+}

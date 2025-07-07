@@ -1,34 +1,39 @@
 {
-  "name": "gemini-mcp-server",
-  "version": "0.1.0",
-  "description": "Model Context Protocol server for Google Gemini AI",
-  "main": "mcp.js",
+  "name": "automation-mcp-server",
+  "version": "1.0.0",
   "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "automation-mcp-server": "./build/index.js"
+  },
   "scripts": {
-    "start": "node mcp.js",
-    "dev": "node mcp.js",
-    "api": "node api-server.js",
-    "api:dev": "node api-server.js",
-    "test:api": "node test_api.js"
+    "build": "npx tsc --target es2020 --module nodenext --skipLibCheck --esModuleInterop --outDir build --rootDir src --noEmitOnError false --moduleResolution nodenext",
+    "start": "node build/index.js",
+    "dev": "npm run build && npm start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raghav3615/gemini-mcp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/raghav3615/gemini-mcp/issues"
+  },
+  "homepage": "https://github.com/raghav3615/gemini-mcp#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "@types/nodemailer": "^6.4.17",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
-    "@modelcontextprotocol/sdk": "^0.5.0",
-    "cors": "^2.8.5",
-    "dotenv": "^17.0.1",
-    "express": "^4.19.2",
-    "node-fetch": "^3.3.2"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "keywords": [
-    "mcp",
-    "model-context-protocol",
-    "gemini",
-    "ai",
-    "google"
-  ],
-  "author": "",
-  "license": "MIT"
+    "@modelcontextprotocol/sdk": "^1.15.0",
+    "axios": "^1.10.0",
+    "googleapis": "^150.0.1",
+    "nodemailer": "^7.0.4",
+    "zod": "^3.25.75"
+  }
 }

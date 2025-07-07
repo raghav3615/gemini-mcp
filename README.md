@@ -1,90 +1,245 @@
-# Gemini MCP Server
+# Automation MCP Server
 
-A Model Context Protocol (MCP) server that provides access to Google's Gemini AI models.
+A Model Context Protocol (MCP) server that provides email automation, Google Calendar scheduling, and Spotify song recommendation capabilities.
 
 ## Features
 
-- **Gemini Chat**: Chat with various Gemini models (1.5-flash, 1.5-pro, 1.0-pro)
-- **Gemini Vision**: Analyze images using Gemini's vision capabilities
-- **Code Execution**: Execute Python code using Gemini's code execution feature
-- **Function Calling**: Use Gemini with custom function definitions
+### 📧 Email Automation
+- Send emails instantly
+- Schedule emails for future delivery
+- HTML and plain text support
+- Gmail integration
 
-## Setup
+### 📅 Google Calendar
+- Create calendar events
+- List upcoming events
+- Update existing events
+- Delete events
+- Support for attendees and locations
 
-1. **Install dependencies:**
+### 🎵 Spotify Integration
+- Get song recommendations based on preferences
+- Search for tracks, artists, albums, and playlists
+- Get available genres
+- Get track audio features
+
+## Installation
+
+1. Clone this repository
+2. Install dependencies:
    ```bash
    npm install
    ```
-
-2. **Get a Gemini API key:**
-   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Create a new API key
-   - Copy the API key
-
-3. **Set the environment variable:**
-   
-   **Windows (PowerShell):**
-   ```powershell
-   $env:GEMINI_API_KEY="your_api_key_here"
-   ```
-   
-   **Windows (Command Prompt):**
-   ```cmd
-   set GEMINI_API_KEY=your_api_key_here
-   ```
-   
-   **Linux/macOS:**
+3. Copy the environment template and configure your API keys:
    ```bash
-   export GEMINI_API_KEY="your_api_key_here"
+   cp .env.template .env
+   ```
+4. Build the project:
+   ```bash
+   npm run build
    ```
 
-   Or create a `.env` file (copy from `.env.example` and update):
-   ```
-   GEMINI_API_KEY=your_actual_api_key_here
-   ```
+## Configuration
 
-## Running the Server
+### Email (Gmail)
+1. Enable 2-factor authentication on your Gmail account
+2. Generate an App Password: https://support.google.com/accounts/answer/185833
+3. Set `EMAIL_USER` and `EMAIL_PASS` in your `.env` file
+
+### Google Calendar
+1. Go to the Google Cloud Console: https://console.cloud.google.com/
+2. Create a new project or select an existing one
+3. Enable the Google Calendar API
+4. Create OAuth 2.0 credentials:
+   - Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client IDs"
+   - Choose "Desktop application"
+   - Download the credentials JSON file
+5. Generate a refresh token using the OAuth 2.0 playground or a script
+6. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REFRESH_TOKEN` in your `.env` file
+
+### Spotify
+1. Go to Spotify Developer Dashboard: https://developer.spotify.com/dashboard
+2. Create a new app
+3. Get your Client ID and Client Secret
+4. Set `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in your `.env` file
+
+## Usage
+
+### Running the MCP Server
 
 ```bash
 npm start
 ```
 
-The server will run on stdio and can be used with MCP-compatible clients.
+### Available Tools
 
-## Available Tools
+#### Email Tools
+- `send-email`: Send an email immediately
+- `schedule-email`: Schedule an email for future delivery
 
-### 1. gemini_chat
-Chat with Gemini AI models.
+#### Calendar Tools
+- `create-calendar-event`: Create a new calendar event
+- `list-calendar-events`: List upcoming events
+- `update-calendar-event`: Update an existing event
+- `delete-calendar-event`: Delete an event
 
-**Parameters:**
-- `message` (required): The message to send
-- `model` (optional): Model to use (default: gemini-1.5-flash)
-- `temperature` (optional): Response randomness 0.0-1.0 (default: 0.7)
-- `maxTokens` (optional): Maximum response tokens (default: 1000)
+#### Spotify Tools
+- `get-song-recommendations`: Get personalized song recommendations
+- `search-spotify`: Search for music content
+- `create-spotify-playlist`: Create a new playlist (requires user auth)
+- `get-user-playlists`: Get user's playlists (requires user auth)
 
-### 2. gemini_vision
-Analyze images with Gemini Vision.
+### Using with Claude Desktop
 
-**Parameters:**
-- `imageUrl` or `imageBase64`: Image to analyze
-- `prompt` (optional): Analysis prompt (default: "Describe this image in detail")
-- `model` (optional): Model to use (default: gemini-1.5-flash)
+Add this server to your Claude Desktop configuration:
 
-### 3. gemini_code_execution
-Execute Python code using Gemini.
+**Windows:**
+```json
+{
+  "mcpServers": {
+    "automation": {
+      "command": "node",
+      "args": ["C:\\path\\to\\your\\project\\build\\index.js"]
+    }
+  }
+}
+```
 
-**Parameters:**
-- `code` (required): Python code to execute
-- `language` (optional): Programming language (default: python)
-- `description` (optional): Description of what the code does
+**macOS/Linux:**
+```json
+{
+  "mcpServers": {
+    "automation": {
+      "command": "node",
+      "args": ["/path/to/your/project/build/index.js"]
+    }
+  }
+}
+```
 
-### 4. gemini_function_calling
-Use Gemini with function calling capabilities.
+## API Reference
 
-**Parameters:**
-- `message` (required): The query for Gemini
-- `functions` (required): Array of function definitions
+### Email API
 
-## Example Usage
+#### Send Email
+```typescript
+{
+  "name": "send-email",
+  "arguments": {
+    "to": "recipient@example.com",
+    "subject": "Hello World",
+    "body": "This is the email content",
+    "html": false
+  }
+}
+```
 
-The server is designed to be used with MCP-compatible clients. Once running, the tools can be called through the MCP protocol.
+#### Schedule Email
+```typescript
+{
+  "name": "schedule-email",
+  "arguments": {
+    "to": "recipient@example.com",
+    "subject": "Scheduled Email",
+    "body": "This will be sent later",
+    "scheduleTime": "2024-12-25T10:00:00Z",
+    "html": false
+  }
+}
+```
+
+### Calendar API
+
+#### Create Calendar Event
+```typescript
+{
+  "name": "create-calendar-event",
+  "arguments": {
+    "summary": "Team Meeting",
+    "description": "Weekly team sync",
+    "start": "2024-07-08T14:00:00Z",
+    "end": "2024-07-08T15:00:00Z",
+    "attendees": ["john@example.com", "jane@example.com"],
+    "location": "Conference Room A"
+  }
+}
+```
+
+#### List Calendar Events
+```typescript
+{
+  "name": "list-calendar-events",
+  "arguments": {
+    "startDate": "2024-07-08T00:00:00Z",
+    "endDate": "2024-07-15T00:00:00Z",
+    "maxResults": 10
+  }
+}
+```
+
+### Spotify API
+
+#### Get Song Recommendations
+```typescript
+{
+  "name": "get-song-recommendations",
+  "arguments": {
+    "genres": ["pop", "rock"],
+    "limit": 10,
+    "energy": 0.7,
+    "valence": 0.8,
+    "danceability": 0.6
+  }
+}
+```
+
+#### Search Spotify
+```typescript
+{
+  "name": "search-spotify",
+  "arguments": {
+    "query": "Bohemian Rhapsody",
+    "type": "track",
+    "limit": 5
+  }
+}
+```
+
+## Development
+
+### Scripts
+- `npm run build`: Compile TypeScript to JavaScript
+- `npm start`: Run the compiled server
+- `npm run dev`: Build and run in development mode
+
+### Project Structure
+```
+src/
+├── index.ts              # Main MCP server
+├── services/
+│   ├── email.ts          # Email service
+│   ├── calendar.ts       # Google Calendar service
+│   └── spotify.ts        # Spotify service
+build/                    # Compiled JavaScript
+.vscode/
+└── mcp.json             # MCP configuration for VS Code
+```
+
+## Troubleshooting
+
+1. **Email not sending**: Check your Gmail app password and 2FA settings
+2. **Calendar API errors**: Verify your Google Cloud project has the Calendar API enabled
+3. **Spotify rate limits**: The service uses client credentials flow with rate limits
+4. **Build errors**: Make sure all dependencies are installed with `npm install`
+
+## License
+
+MIT License - see LICENSE file for details.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
